@@ -56,7 +56,7 @@ public class OrderControllerTest {
     void testGetOrder() throws Exception {
 
         Order order = new Order();
-        order.setOrderId(1L);   // ✅ FIX
+        order.setOrderId(1L);   
 
         when(service.getById(1L)).thenReturn(order);
 

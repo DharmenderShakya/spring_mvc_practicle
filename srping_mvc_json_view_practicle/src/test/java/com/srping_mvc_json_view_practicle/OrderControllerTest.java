@@ -43,7 +43,7 @@ class OrderControllerTest {
     @Test
     void testCreateOrder() throws Exception {
 
-        //  Use DTO (NOT entity)
+        
         OrderRequest request = new OrderRequest();
         request.setUserId(2L);
         request.setProduct("Laptop");

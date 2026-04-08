@@ -1,0 +1,118 @@
+package com.srping_mvc_library_practicle.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.security.web.bind.annotation.AuthenticationPrincipal;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.srping_mvc_library_practicle.configration.JWTUtils;
+import com.srping_mvc_library_practicle.customRepository.UserCustomRepository;
+import com.srping_mvc_library_practicle.entity.Users;
+import com.srping_mvc_library_practicle.request.AuthRequest;
+import com.srping_mvc_library_practicle.service.LoginAttemptService;
+
+
+
+@RestController
+@RequestMapping("/auth") 
+public class AuthController {
+
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	
+	@Autowired
+	private JWTUtils jUtils;
+	
+	@Autowired
+	private LoginAttemptService loService;
+	
+    @Autowired
+    private UserCustomRepository userRepository;
+	
+	@PostMapping("/login")
+	public String login(@RequestBody AuthRequest request) {
+	
+		try {
+			Authentication auth = authenticationManager.authenticate(
+			        new UsernamePasswordAuthenticationToken(
+			            request.getUserName(),
+			            request.getPassword()
+			        )
+			    );
+
+			    UserDetails user = (UserDetails) auth.getPrincipal();
+			    
+			    loService.loginSucceeded(user.getUsername());
+			    
+			    return jUtils.generateToken(user);
+			    
+		} catch (Exception e) {
+			
+			loService.loginFailed(request.getUserName());
+		
+			return e.getMessage();
+		}
+
+	}
+	
+	@PostMapping("/createUser")
+	public String createUser(@RequestBody Users request) {
+
+		userRepository.saveUser(request);
+		
+		return "User Successfully created";
+
+	}
+	
+	@PutMapping("/unlock/{username}")
+    @PreAuthorize("hasRole('SUPER_ADMIN')")
+    public String unlockAccount(@PathVariable String username) {
+
+		Users user = userRepository.getByUserName(username).orElse(null);
+
+        if (user != null) {
+            user.setFailedAttempts(0);
+            user.setAccountNonLocked(false);
+            userRepository.updateUser(user);
+        }
+
+        return "Account unlocked for " + username;
+    }
+	
+	@GetMapping("/test")
+	public String test() {
+	    return "TEST WORKING";
+	}
+	
+	@GetMapping("/user")
+	public String user(@AuthenticationPrincipal OAuth2User principal) {
+
+	    if (principal == null) {
+	        return "User not authenticated";
+	    }
+
+	    return "Login Successful\n" +
+	           "Name: " + principal.getAttribute("name") + "\n" +
+	           "Email: " + principal.getAttribute("email");
+	}
+	
+    @GetMapping("/")
+    public String home() {
+        return "Home Page";
+    }
+
+	
+}

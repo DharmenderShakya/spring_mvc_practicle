@@ -58,11 +58,11 @@ class UserControllerTest {
                 .andExpect(status().isOk());
     }
 
-//    @Test
-//    void testDeleteUser() throws Exception {
-//        mockMvc.perform(delete("/users/delete/2"))
-//                .andExpect(status().isOk());
-//
-//        Mockito.verify(userService).deleteUser(1L);
-//    }
+   @Test
+   void testDeleteUser() throws Exception {
+       mockMvc.perform(delete("/users/delete/2"))
+               .andExpect(status().isOk());
+
+       Mockito.verify(userService).deleteUser(1L);
+   }
 }

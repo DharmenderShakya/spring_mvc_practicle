@@ -41,7 +41,7 @@ public class ProductControllerTest {
 
         mockMvc.perform(get("/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].productId").value(1))   // ✅ FIX
+                .andExpect(jsonPath("$[0].productId").value(1))   
                 .andExpect(jsonPath("$[0].name").value("Test Product"));
     }
 
@@ -79,7 +79,7 @@ public class ProductControllerTest {
                         }
                         """))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.productId").value(1))   // ✅ FIX
+                .andExpect(jsonPath("$.productId").value(1))   
                 .andExpect(jsonPath("$.name").value("New Product"));
     }
 
